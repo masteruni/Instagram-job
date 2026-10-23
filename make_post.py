@@ -39,6 +39,9 @@ def run(cmd):
 
 def download(url, workdir):
     workdir.mkdir(parents=True, exist_ok=True)
+    if (workdir / "source.mp4").exists() and (workdir / "source.info.json").exists():
+        # already fetched; re-downloading quickly trips Instagram's rate limit (HTTP 429)
+        return workdir / "source.mp4", json.loads((workdir / "source.info.json").read_text())
     run(["yt-dlp", "-q", "--no-warnings", "--write-info-json",
          "-f", "bv*+ba/b", "--merge-output-format", "mp4",
          "-o", str(workdir / "source.%(ext)s"), url])
@@ -46,34 +49,66 @@ def download(url, workdir):
     return workdir / "source.mp4", info
 
 
-def detect_clip_box(src):
-    """Find the actual video area inside the source reel (drops black bars + burned-in text)."""
-    out = subprocess.run(
-        ["ffmpeg", "-i", str(src), "-vf", "cropdetect=24:2:0", "-f", "null", "-"],
-        capture_output=True, text=True).stderr
-    crops = re.findall(r"crop=(\d+):(\d+):(\d+):(\d+)", out)
-    if not crops:
+def detect_clip_box(src, samples=24):
+    """Find the actual video area inside the source reel.
+
+    Works on any layout (black or white template, text above/below): the clip is
+    the region whose pixels change over time, while backgrounds and burned-in text stay still.
+    """
+    import numpy as np
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+         "stream=width,height:format=duration", "-of", "json", str(src)],
+        capture_output=True, text=True).stdout
+    meta = json.loads(probe)
+    w, h = meta["streams"][0]["width"], meta["streams"][0]["height"]
+    dur = float(meta["format"]["duration"])
+    frames = []
+    for i in range(samples):
+        t = dur * (i + 0.5) / samples
+        raw = subprocess.run(
+            ["ffmpeg", "-v", "error", "-ss", f"{t:.3f}", "-i", str(src), "-frames:v", "1",
+             "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True).stdout
+        if len(raw) == w * h:
+            frames.append(np.frombuffer(raw, np.uint8).reshape(h, w))
+    if len(frames) < 3:
         return None
-    w, h, x, y = map(int, max(set(crops), key=crops.count))
-    # cropdetect includes the source's caption text above the clip; trim it by
-    # finding the tallest run of bright rows (the clip itself) in a middle frame.
-    frame = ROOT / ".probe.png"
-    run(["ffmpeg", "-v", "error", "-y", "-ss", "1", "-i", str(src), "-frames:v", "1", str(frame)])
-    im = Image.open(frame).convert("L")
-    frame.unlink()
-    px = im.load()
-    rows = [r for r in range(y, y + h) if max(px[c, r] for c in range(x, x + w, 4)) > 24]
-    runs, start, prev = [], rows[0], rows[0]
-    for r in rows[1:]:
-        if r != prev + 1:
-            runs.append((start, prev))
-            start = r
-        prev = r
-    runs.append((start, prev))
-    top, bot = max(runs, key=lambda s: s[1] - s[0])
-    # crop must have even dimensions for yuv420
-    h = (bot - top + 1) // 2 * 2
-    return w // 2 * 2, h, x, top
+    stack = np.stack(frames).astype(np.int16)
+    moving = (stack.max(0) - stack.min(0)) > 25
+
+    def longest_run(mask):
+        best, cur, start = (0, -1), 0, 0
+        for i, v in enumerate(mask):
+            if v:
+                if cur == 0:
+                    start = i
+                cur += 1
+                if cur > best[1] - best[0] + 1:
+                    best = (start, i)
+            else:
+                cur = 0
+        return best
+
+    top, bot = longest_run(moving.mean(1) > 0.25)
+    left, right = longest_run(moving[top:bot + 1].mean(0) > 0.25)
+    if bot - top < 50 or right - left < 50:
+        return None
+    # static parts of the clip (a still wall, a TV logo) don't move, so grow the
+    # box outward until rows/columns are just the template's background colour
+    bg = int(np.median(np.concatenate([stack[:, :8, :8].ravel(), stack[:, :8, -8:].ravel()])))
+    content = (np.abs(stack - bg) > 18).any(0)
+    while top > 0 and content[top - 1, left:right + 1].mean() > 0.5:
+        top -= 1
+    while bot < h - 1 and content[bot + 1, left:right + 1].mean() > 0.5:
+        bot += 1
+    while left > 0 and content[top:bot + 1, left - 1].mean() > 0.5:
+        left -= 1
+    while right < w - 1 and content[top:bot + 1, right + 1].mean() > 0.5:
+        right += 1
+    # trim 2px of edge anti-aliasing and keep yuv420-friendly even values
+    top, left = (top + 2) // 2 * 2, (left + 2) // 2 * 2
+    cw, ch = (right - 2 - left) // 2 * 2, (bot - 2 - top) // 2 * 2
+    return cw, ch, left, top
 
 
 def ss(img_size, scale=4):
