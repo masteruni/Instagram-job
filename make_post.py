@@ -247,7 +247,7 @@ def build_thumbnail(src, box, t, focus, out, workdir, zoom=1.0):
     canvas.convert("RGB").save(out, quality=95)
 
 
-CAPTION = """{hook} 😭
+CAPTION = """{hook} {emoji}
 
 {context}
 
@@ -263,6 +263,7 @@ def main():
     ap.add_argument("url")
     ap.add_argument("--hook", required=True, help="line shown above the clip")
     ap.add_argument("--context", default="", help="1-2 sentence body for the caption")
+    ap.add_argument("--emoji", default="😭", help="emoji after the hook in the caption; match the clip's tone")
     ap.add_argument("--tags", default="#comedy #funny #reels #viral #explorepage")
     ap.add_argument("--thumb-time", type=float, default=None)
     ap.add_argument("--thumb-focus", type=float, default=0.5)
@@ -289,7 +290,7 @@ def main():
     build_thumbnail(src, box, t, args.thumb_focus, outdir / "thumbnail.jpg", work, args.thumb_zoom)
     credit = "@" + (info.get("channel") or info.get("uploader_id") or "original creator")
     (outdir / "caption.txt").write_text(CAPTION.format(
-        hook=args.hook, context=args.context, credit=credit, tags=args.tags).replace("\n\n\n", "\n\n"))
+        hook=args.hook, emoji=args.emoji, context=args.context, credit=credit, tags=args.tags).replace("\n\n\n", "\n\n"))
     print(f"done -> {outdir}")
 
 
