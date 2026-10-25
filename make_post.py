@@ -8,7 +8,7 @@ Outputs (in output/<shortcode>/):
 
 Usage:
   python3 make_post.py <instagram_url> --hook "Yep that's your daughter"
-      [--thumb-time 4.0] [--thumb-focus 0.5] [--caption "..."]
+      [--thumb-time 4.0] [--thumb-focus 0.5] [--thumb-zoom 1.0]
 """
 import argparse
 import json
@@ -211,17 +211,18 @@ def build_video(src, box, hook, out, workdir):
          "-r", "30", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(out)])
 
 
-def build_thumbnail(src, box, t, focus, out, workdir):
+def build_thumbnail(src, box, t, focus, out, workdir, zoom=1.0):
     cw, ch, cx, cy = box
     frame = workdir / "thumb_frame.png"
     run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", str(src),
          "-vf", f"crop={cw}:{ch}:{cx}:{cy}", "-frames:v", "1", str(frame)])
     im = Image.open(frame).convert("RGB")
     # cover-fit 9:16, horizontal focus point 0..1
-    scale = max(W / im.width, H / im.height)
+    scale = max(W / im.width, H / im.height) * zoom
     im = im.resize((int(im.width * scale + 0.5), int(im.height * scale + 0.5)), Image.LANCZOS)
     left = int(min(max(focus * im.width - W / 2, 0), im.width - W))
-    top = (im.height - H) // 2
+    # when zoomed, keep the top: subtitles, watermarks and logos sit at the clip's bottom
+    top = (im.height - H) // 2 if zoom == 1.0 else int((im.height - H) * 0.1)
     canvas = im.crop((left, top, left + W, top + H)).convert("RGBA")
 
     # navy gradients sampled from the template: solid at the edges, header sits on navy
@@ -265,6 +266,8 @@ def main():
     ap.add_argument("--tags", default="#comedy #funny #reels #viral #explorepage")
     ap.add_argument("--thumb-time", type=float, default=None)
     ap.add_argument("--thumb-focus", type=float, default=0.5)
+    ap.add_argument("--thumb-zoom", type=float, default=1.0,
+                    help=">1 crops off the clip's bottom strip (subtitles/watermarks)")
     args = ap.parse_args()
 
     code = re.search(r"/(?:reel|p|reels)/([\w-]+)", args.url)
@@ -283,7 +286,7 @@ def main():
 
     outdir.mkdir(parents=True, exist_ok=True)
     build_video(src, box, args.hook, outdir / "video.mp4", work)
-    build_thumbnail(src, box, t, args.thumb_focus, outdir / "thumbnail.jpg", work)
+    build_thumbnail(src, box, t, args.thumb_focus, outdir / "thumbnail.jpg", work, args.thumb_zoom)
     credit = "@" + (info.get("channel") or info.get("uploader_id") or "original creator")
     (outdir / "caption.txt").write_text(CAPTION.format(
         hook=args.hook, context=args.context, credit=credit, tags=args.tags).replace("\n\n\n", "\n\n"))
