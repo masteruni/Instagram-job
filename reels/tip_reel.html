@@ -108,7 +108,10 @@ window.setup = (spec, avatarUrl) => {
   document.getElementById('answer').innerHTML = spec.answer.map(l =>
     l === '' ? '<div class="line gap"></div>' : `<div class="line">${fmt(l)}</div>`).join('');
   document.getElementById('endBig').innerHTML = fmt(spec.endBig || 'Comment *TEAM* for 5 more prompts like this');
-  document.getElementById('endPill').textContent = spec.endPill || 'Follow @theaiedgedaily';
+  // one call to action per post (Dave's plan): the pill only shows if a spec asks for it
+  const pill = document.getElementById('endPill');
+  pill.textContent = spec.endPill || '';
+  pill.style.display = spec.endPill ? '' : 'none';
   lines = [...document.querySelectorAll('#answer .line:not(.gap)')];
   // timeline (seconds)
   const n = lines.length;
