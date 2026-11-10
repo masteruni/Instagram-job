@@ -117,7 +117,8 @@ window.setup = (spec, avatarUrl) => {
   T.ansEnd = T.ansStart + n * T.ansStep;
   T.endStart = Math.max(18.4, T.ansEnd + 1.8);
   T.total = T.endStart + 3.6;
-  return T.total;
+  T.lineTimes = lines.map((_, i) => T.ansStart + i * T.ansStep);
+  return T;
 };
 
 window.render = t => {

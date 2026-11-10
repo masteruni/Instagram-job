@@ -1,0 +1,8 @@
+{
+  "_note": "Epidemic Sound effects used by render.js. Download each as WAV into .work/sfx/<name>.wav (not committed: licensed files).",
+  "typing":  { "id": "3a722cb7-a75f-4d43-9fc8-ec95a175757e", "title": "Computers, Keyboard & Mouse, Keyboard, Laptop, Typing, HP Stream, Fast" },
+  "whoosh":  { "id": "27384f5f-7e69-4f29-916d-b31071cf0112", "title": "Swooshes, Whoosh, Tech, Data Transition 02" },
+  "sent":    { "id": "7bb0265e-6b48-4e13-a3be-83170b4255d1", "title": "User Interface, Alert, Notification, Message, Text 02" },
+  "tap":     { "id": "45c94b43-2fb0-4970-98db-cc0fe6ea3678", "title": "User Interface, Click, UI Buttons, Glassy, Touch" },
+  "success": { "id": "aaa20ea0-8cdc-4c8f-991b-c58a94c0d130", "title": "User Interface, Misc, Completions, Melodic, Success" }
+}

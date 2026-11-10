@@ -21,3 +21,6 @@ node reels/render.js reels/specs/<name>.json   # needs Playwright Chromium + ffm
 ```
 
 Results land in `output/<name>/`. In text, `*word*` is yellow, `**word**` is bold and `==text==` gets highlighted.
+
+Sound effects come from Epidemic Sound (IDs in `reels/sfx.json`). Download each as WAV
+into `.work/sfx/<name>.wav`; they are licensed, so they are not committed. Without them the reel renders silent.
