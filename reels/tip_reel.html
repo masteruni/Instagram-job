@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body {
+    font-family: "Inter", sans-serif;
+    color: #fff;
+    background: radial-gradient(120% 70% at 50% 35%, #0a2a9c 0%, #021258 55%, #010a35 100%);
+    position: relative;
+  }
+  .scene { position: absolute; inset: 0; }
+
+  /* header: avatar + name + badge + handle */
+  .header { position: absolute; left: 80px; top: 270px; display: flex; align-items: center; gap: 22px; }
+  .header img { width: 120px; height: 120px; border-radius: 50%; }
+  .name { font-weight: 700; font-size: 46px; display: flex; align-items: center; gap: 10px; }
+  .handle { font-style: italic; font-size: 34px; color: #a9b4d6; margin-top: 4px; }
+
+  /* scene 1: hook */
+  #hook { display: flex; flex-direction: column; justify-content: center; padding: 0 90px; }
+  #hook h1 { font-size: 104px; line-height: 1.08; font-weight: 800; letter-spacing: -2px; }
+  #hook h1 em { font-style: normal; color: #ffd84d; }
+  #hook p { margin-top: 40px; font-size: 46px; color: #c9d3f2; font-weight: 500; }
+
+  /* scenes 2-3: chat */
+  #title { position: absolute; left: 80px; right: 80px; top: 430px; font-size: 52px; font-weight: 800; line-height: 1.15; }
+  #title em { font-style: normal; color: #ffd84d; }
+  .card {
+    position: absolute; left: 50px; right: 50px; top: 590px; height: 980px;
+    background: #f7f7f8; border-radius: 36px; overflow: hidden; color: #1d1d1f;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  }
+  .bar { height: 78px; background: #ececef; display: flex; align-items: center; padding: 0 30px; gap: 12px; }
+  .dot { width: 20px; height: 20px; border-radius: 50%; }
+  .bar span { margin-left: 18px; font-size: 30px; color: #6e6e73; font-weight: 600; }
+  .viewport { position: absolute; top: 78px; bottom: 0; left: 0; right: 0; overflow: hidden; }
+  .feed { position: absolute; left: 0; right: 0; top: 0; padding: 34px 34px 40px; }
+  .user {
+    margin-left: auto; max-width: 860px; background: #2f6bff; color: #fff;
+    border-radius: 34px 34px 8px 34px; padding: 26px 32px; font-size: 40px; line-height: 1.38;
+    white-space: pre-wrap; width: fit-content;
+  }
+  .caret { display: inline-block; width: 4px; height: 44px; background: #fff; vertical-align: -8px; margin-left: 2px; }
+  .ai { margin-top: 34px; display: flex; gap: 20px; align-items: flex-start; }
+  .ai .av { flex: none; width: 64px; height: 64px; border-radius: 50%; background: #1d1d1f; display: grid; place-items: center; }
+  .ai .body { font-size: 40px; line-height: 1.38; flex: 1; }
+  .ai .line { opacity: 0; transform: translateY(14px); }
+  .ai .line + .line { margin-top: 6px; }
+  .ai .gap { height: 18px; }
+  .ai .hl { background-image: linear-gradient(#ffe56b, #ffe56b); background-repeat: no-repeat; background-size: 0% 100%; border-radius: 6px; padding: 0 6px; margin-left: -6px; }
+  .ai b { font-weight: 700; }
+  .thinking { display: flex; gap: 12px; padding: 20px 0; }
+  .thinking i { width: 18px; height: 18px; border-radius: 50%; background: #8e8e93; display: block; }
+
+  /* end card */
+  #end { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80px; }
+  #end .big { font-size: 84px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
+  #end .big em { font-style: normal; color: #ffd84d; }
+  #end .pill { margin-top: 60px; background: #fff; color: #021258; font-size: 48px; font-weight: 700; padding: 26px 50px; border-radius: 999px; }
+  #end img { width: 170px; height: 170px; border-radius: 50%; margin-bottom: 50px; }
+</style>
+</head>
+<body>
+<div class="header" id="hdr"></div>
+
+<div class="scene" id="hook"><h1 id="hookText"></h1><p id="hookSub"></p></div>
+
+<div class="scene" id="chat">
+  <div id="title"></div>
+  <div class="card">
+    <div class="bar"><i class="dot" style="background:#ff5f57"></i><i class="dot" style="background:#febc2e"></i><i class="dot" style="background:#28c840"></i><span>AI Chat</span></div>
+    <div class="viewport"><div class="feed" id="feed">
+      <div class="user" id="user"></div>
+      <div class="ai" id="ai">
+        <div class="av"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg></div>
+        <div class="body"><div class="thinking" id="think"><i></i><i></i><i></i></div><div id="answer"></div></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="scene" id="end">
+  <img id="endAv">
+  <div class="big" id="endBig"></div>
+  <div class="pill" id="endPill"></div>
+</div>
+
+<script>
+const BADGE = '<svg width="42" height="42" viewBox="0 0 40 40"><path fill="#1877f2" d="M20 1l4.2 3.4 5.3-.8 2 5 5 2-.8 5.3L39 20l-3.4 4.2.8 5.3-5 2-2 5-5.3-.8L20 39l-4.2-3.4-5.3.8-2-5-5-2 .8-5.3L1 20l3.4-4.2-.8-5.3 5-2 2-5 5.3.8z"/><path d="M12 20.5l5.2 5L28.5 14" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+// **bold**, ==highlight==, *accent* (yellow, in titles)
+const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/==(.+?)==/g, '<span class="hl">$1</span>').replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+let S, lines, T;
+window.setup = (spec, avatarUrl) => {
+  S = spec;
+  document.getElementById('hdr').innerHTML =
+    `<img src="${avatarUrl}"><div><div class="name">The AI Edge Daily ${BADGE}</div><div class="handle">@theaiedgedaily</div></div>`;
+  document.getElementById('endAv').src = avatarUrl;
+  document.getElementById('hookText').innerHTML = fmt(spec.hook);
+  document.getElementById('hookSub').textContent = spec.hookSub || '';
+  document.getElementById('title').innerHTML = fmt(spec.title || spec.hook);
+  document.getElementById('answer').innerHTML = spec.answer.map(l =>
+    l === '' ? '<div class="line gap"></div>' : `<div class="line">${fmt(l)}</div>`).join('');
+  document.getElementById('endBig').innerHTML = fmt(spec.endBig || 'Comment *TEAM* for 5 more prompts like this');
+  document.getElementById('endPill').textContent = spec.endPill || 'Follow @theaiedgedaily';
+  lines = [...document.querySelectorAll('#answer .line:not(.gap)')];
+  // timeline (seconds)
+  const n = lines.length;
+  T = { hookEnd: 2.2, typeStart: 2.6, typeEnd: 7.6, think: 8.4, ansStart: 8.6,
+        ansStep: Math.min(1.0, 8.4 / n) };
+  T.ansEnd = T.ansStart + n * T.ansStep;
+  T.endStart = Math.max(18.4, T.ansEnd + 1.8);
+  T.total = T.endStart + 3.6;
+  return T.total;
+};
+
+window.render = t => {
+  const hook = document.getElementById('hook'), chat = document.getElementById('chat'), end = document.getElementById('end');
+  // scene 1
+  const h1 = document.getElementById('hookText'), sub = document.getElementById('hookSub');
+  const hin = ease(t / 0.5), hout = ease((t - T.hookEnd) / 0.35);
+  hook.style.opacity = hin * (1 - hout);
+  h1.style.transform = `translateY(${(1 - hin) * 60 - hout * 80}px) scale(${0.94 + 0.06 * hin})`;
+  sub.style.opacity = ease((t - 0.5) / 0.4);
+  // scene 2/3
+  const cin = ease((t - T.hookEnd) / 0.45), cout = ease((t - T.endStart) / 0.4);
+  chat.style.opacity = cin * (1 - cout);
+  chat.style.transform = `translateY(${(1 - cin) * 80}px)`;
+  const p = S.prompt, k = Math.floor(p.length * clamp((t - T.typeStart) / (T.typeEnd - T.typeStart)));
+  const typing = t < T.typeEnd + 0.4 && Math.floor(t * 2.2) % 2 === 0 || (t >= T.typeStart && t < T.typeEnd);
+  document.getElementById('user').innerHTML = esc(p.slice(0, k)) + (typing ? '<span class="caret"></span>' : '');
+  document.getElementById('user').style.opacity = t < T.typeStart - 0.1 ? 0 : 1;
+  const ai = document.getElementById('ai');
+  ai.style.opacity = t >= T.typeEnd + 0.3 ? 1 : 0;
+  const think = document.getElementById('think');
+  think.style.display = t < T.ansStart + 0.2 ? 'flex' : 'none';
+  [...think.children].forEach((d, i) => d.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 9 - i * 1.1)));
+  lines.forEach((l, i) => {
+    const a = ease((t - (T.ansStart + i * T.ansStep)) / 0.35);
+    l.style.opacity = a; l.style.transform = `translateY(${(1 - a) * 14}px)`;
+    l.querySelectorAll('.hl').forEach(h => h.style.backgroundSize = `${100 * ease((t - (T.ansStart + i * T.ansStep) - 0.35) / 0.5)}% 100%`);
+  });
+  // auto-scroll the chat so the newest line stays visible
+  const feed = document.getElementById('feed'), vp = feed.parentElement;
+  const visible = [...lines].filter(l => parseFloat(l.style.opacity) > 0.01);
+  let bottom = document.getElementById('user').offsetTop + document.getElementById('user').offsetHeight + 40;
+  if (t >= T.typeEnd + 0.3) bottom = Math.max(bottom, (visible.length ? visible[visible.length - 1].offsetTop + visible[visible.length - 1].offsetHeight + 34 : 120));
+  feed.style.transform = `translateY(${-Math.max(0, bottom + 40 - vp.clientHeight)}px)`;
+  // header hidden on end card (avatar is shown big there)
+  document.getElementById('hdr').style.opacity = 1 - cout;
+  end.style.opacity = cout;
+  end.style.transform = `scale(${0.96 + 0.04 * cout})`;
+};
+</script>
+</body>
+</html>

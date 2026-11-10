@@ -11,3 +11,13 @@ python3 make_post.py "<reel url>" --hook "Yep that's your daughter" \
 ```
 
 Results land in `output/<shortcode>/`. `assets/avatar.png` is the profile picture.
+
+## Original AI-tip reels
+
+Write a spec in `reels/specs/<name>.json` (hook, prompt, answer lines, caption), then:
+
+```bash
+node reels/render.js reels/specs/<name>.json   # needs Playwright Chromium + ffmpeg
+```
+
+Results land in `output/<name>/`. In text, `*word*` is yellow, `**word**` is bold and `==text==` gets highlighted.
