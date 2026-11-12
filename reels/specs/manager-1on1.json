@@ -1,0 +1,18 @@
+{
+  "hook": "Managers, steal this *1-on-1 prompt*",
+  "hookSub": "For the employee who keeps missing deadlines.",
+  "title": "A full 1-on-1 plan in *seconds*",
+  "prompt": "I'm a manager. Tomorrow I have a 1-on-1 with a great employee who missed 3 deadlines this month. Give me a 15-minute agenda with 5 questions to ask.",
+  "answer": [
+    "**15-minute 1-on-1 agenda**",
+    "2 min check-in · 8 min questions · 5 min next steps",
+    "",
+    "1. \"How are things going for you lately?\"",
+    "2. \"A few deadlines slipped. What's getting in the way?\"",
+    "3. ==\"Is your workload realistic right now?\"==",
+    "4. \"What would help you most from me?\"",
+    "5. ==\"What's one thing we'll both do by next week?\"=="
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts for managers",
+  "caption": "Managers, steal this 1-on-1 prompt 🤝\n\nGot a great employee who suddenly keeps missing deadlines? Don't wing the conversation. This prompt gives you a calm 15-minute agenda and the exact questions to ask.\n\nCopy this prompt 👇\n\"I'm a manager. Tomorrow I have a 1-on-1 with an employee who [situation]. Give me a 15-minute agenda with 5 questions to ask.\"\n\nComment TEAM and I'll send you 5 more prompts for managers 📩\n-\n#managers #leadership #aitips #chatgpt #worksmarter"
+}
