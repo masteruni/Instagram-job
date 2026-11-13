@@ -1,0 +1,34 @@
+{
+  "hook": "3 AI tricks to *clear your inbox* faster",
+  "hookSub": "Save this for Monday morning.",
+  "items": [
+    {
+      "title": "Get the point of a *long thread*",
+      "prompt": "Summarize this email thread in 3 bullets. What do I need to do?",
+      "answer": [
+        "• Client wants the deck by **Thursday**",
+        "• Budget stays the same",
+        "==→ You: send a draft by Wednesday=="
+      ]
+    },
+    {
+      "title": "Say no to a meeting, *nicely*",
+      "prompt": "Help me politely decline this meeting and ask for an email update instead.",
+      "answer": [
+        "\"Thanks for the invite! I can't make it,",
+        "==but could you send a quick update by email?==",
+        "Happy to weigh in there.\""
+      ]
+    },
+    {
+      "title": "Reply in *2 lines*, not 20",
+      "prompt": "Write a 2-line reply: I'll send the report Friday. Friendly, not formal.",
+      "answer": [
+        "\"Got it, thanks!",
+        "==I'll have the report over to you by Friday.\"=="
+      ]
+    }
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "3 AI tricks to clear your inbox faster 📥\n\nSave this for Monday morning. Paste the email into any AI chat, then use one of these:\n\n1️⃣ Long thread?\n\"Summarize this email thread in 3 bullets. What do I need to do?\"\n\n2️⃣ Meeting you don't need?\n\"Help me politely decline this meeting and ask for an email update instead.\"\n\n3️⃣ Quick reply?\n\"Write a 2-line reply: [what you want to say]. Friendly, not formal.\"\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#aitips #email #productivity #worksmarter #officelife"
+}

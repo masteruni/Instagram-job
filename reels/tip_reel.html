@@ -62,6 +62,20 @@
   .round { position: absolute; inset: 0; }
   .ttl { position: absolute; left: 0; right: 0; top: 0; }
 
+  /* list mode: numbered tricks, each with a mini chat */
+  .item { position: absolute; inset: 0; }
+  .item .head { position: absolute; left: 80px; right: 80px; top: 450px; display: flex; gap: 30px; align-items: flex-start; }
+  .item .num { flex: none; width: 120px; height: 120px; border-radius: 50%; background: #ffd84d; color: #021258;
+    font-size: 72px; font-weight: 900; display: grid; place-items: center; }
+  .item .ititle { font-size: 64px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; padding-top: 4px; }
+  .item .ititle em { font-style: normal; color: #ffd84d; }
+  .item .count { position: absolute; right: 80px; top: 300px; font-size: 38px; font-weight: 700; color: #a9b4d6; }
+  .item .mini { position: absolute; left: 50px; right: 50px; top: 760px; background: #f7f7f8; border-radius: 36px;
+    color: #1d1d1f; box-shadow: 0 30px 80px rgba(0,0,0,.45); overflow: hidden; }
+  .item .mini .feed { position: relative; min-height: 600px; padding: 40px 38px 46px; }
+  .item .mini .user, .item .mini .ai .body { font-size: 46px; line-height: 1.36; }
+  .item .mini .ai { margin-top: 40px; }
+
   /* end card */
   #end { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80px; }
   #end .big { font-size: 84px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
@@ -82,6 +96,8 @@
     <div class="viewport" id="vp"></div>
   </div>
 </div>
+
+<div class="scene" id="list"></div>
 
 <div class="scene" id="end">
   <img id="endAv">
@@ -112,6 +128,7 @@ window.setup = (spec, avatarUrl) => {
   const pill = document.getElementById('endPill');
   pill.textContent = spec.endPill || '';
   pill.style.display = spec.endPill ? '' : 'none';
+  if (spec.items) return setupList(spec);
 
   // a reel is one or more prompt -> answer rounds (e.g. bad prompt vs better prompt)
   const rounds = spec.rounds || [{ title: spec.title || spec.hook, prompt: spec.prompt, answer: spec.answer }];
@@ -150,6 +167,66 @@ window.setup = (spec, avatarUrl) => {
   return T;
 };
 
+// ---- list mode -------------------------------------------------------------
+let L;
+function setupList(spec) {
+  const list = document.getElementById('list'), n = spec.items.length;
+  list.innerHTML = '';
+  T = { hookEnd: 2.2, rounds: [] };
+  let s0 = T.hookEnd;
+  L = spec.items.map((it, i) => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.innerHTML = `<div class="count">${i + 1} / ${n}</div>
+      <div class="head"><div class="num">${i + 1}</div><div class="ititle">${fmt(it.title)}</div></div>
+      <div class="mini"><div class="bar"><i class="dot" style="background:#ff5f57"></i><i class="dot" style="background:#febc2e"></i><i class="dot" style="background:#28c840"></i><span>AI Chat</span></div>
+      <div class="feed"><div class="user"></div><div class="ai">${AI_AV}<div class="body">
+      <div class="thinking"><i></i><i></i><i></i></div>
+      <div>${it.answer.map(l => l === '' ? '<div class="line gap"></div>' : `<div class="line">${fmt(l)}</div>`).join('')}</div>
+      </div></div></div></div>`;
+    list.appendChild(el);
+    const lines = [...el.querySelectorAll('.line:not(.gap)')];
+    const typeStart = s0 + 0.7;
+    const typeEnd = typeStart + clamp(it.prompt.length / 50, 1.0, 2.4);
+    const ansStart = typeEnd + 0.6;
+    const step = 0.55;
+    const end = ansStart + (lines.length - 1) * step + 0.35 + (it.hold != null ? it.hold : 1.7);
+    const rt = { tone: '', start: s0, typeStart, typeEnd, ansStart, end,
+                 lineTimes: lines.map((_, j) => ansStart + j * step) };
+    T.rounds.push(rt);
+    s0 = end;
+    return { el, it, rt, lines, user: el.querySelector('.user'), ai: el.querySelector('.ai'),
+             think: el.querySelector('.thinking'), head: el.querySelector('.head'), mini: el.querySelector('.mini') };
+  });
+  T.endStart = Math.max(18.4, s0);
+  T.total = T.endStart + 3.6;
+  return T;
+}
+
+function renderList(t, cout) {
+  const list = document.getElementById('list');
+  list.style.opacity = ease((t - T.hookEnd) / 0.35) * (1 - cout);
+  L.forEach((o, i) => {
+    const rt = o.rt, next = L[i + 1];
+    const inn = ease((t - rt.start) / 0.4), out = next ? ease((t - next.rt.start) / 0.3) : 0;
+    o.el.style.opacity = (t < rt.start ? 0 : inn) * (1 - out);
+    o.head.style.transform = `translateX(${(1 - inn) * 120 - out * 120}px)`;
+    o.mini.style.transform = `translateY(${(1 - ease((t - rt.start - 0.15) / 0.45)) * 90}px)`;
+    const p = o.it.prompt, k = Math.floor(p.length * clamp((t - rt.typeStart) / (rt.typeEnd - rt.typeStart)));
+    const typing = (t >= rt.typeStart && t < rt.typeEnd) || (t < rt.typeEnd + 0.4 && Math.floor(t * 2.2) % 2 === 0);
+    o.user.innerHTML = esc(p.slice(0, k)) + (typing ? '<span class="caret"></span>' : '');
+    o.user.style.opacity = t < rt.typeStart - 0.1 ? 0 : 1;
+    o.ai.style.opacity = t >= rt.typeEnd + 0.2 ? 1 : 0;
+    o.think.style.display = t < rt.ansStart + 0.1 ? 'flex' : 'none';
+    [...o.think.children].forEach((d, j) => d.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 9 - j * 1.1)));
+    o.lines.forEach((l, j) => {
+      const lt = rt.lineTimes[j], a = ease((t - lt) / 0.3);
+      l.style.opacity = a; l.style.transform = `translateY(${(1 - a) * 14}px)`;
+      l.querySelectorAll('.hl').forEach(h => h.style.backgroundSize = `${100 * ease((t - lt - 0.3) / 0.45)}% 100%`);
+    });
+  });
+}
+
 window.render = t => {
   const hook = document.getElementById('hook'), chat = document.getElementById('chat'), end = document.getElementById('end');
   // scene 1
@@ -160,6 +237,11 @@ window.render = t => {
   sub.style.opacity = ease((t - 0.5) / 0.4);
   // chat scenes
   const cin = ease((t - T.hookEnd) / 0.45), cout = ease((t - T.endStart) / 0.4);
+  if (S.items) {
+    chat.style.opacity = 0;
+    renderList(t, cout);
+  } else {
+  document.getElementById('list').style.opacity = 0;
   chat.style.opacity = cin * (1 - cout);
   chat.style.transform = `translateY(${(1 - cin) * 80}px)`;
   R.forEach((o, i) => {
@@ -186,6 +268,7 @@ window.render = t => {
     if (t >= rt.typeEnd + 0.3) bottom = Math.max(bottom, shown.length ? shown[shown.length - 1].offsetTop + shown[shown.length - 1].offsetHeight + 34 : 120);
     o.feed.style.transform = `translateY(${-Math.max(0, bottom + 40 - vp.clientHeight)}px)`;
   });
+  }
   // header hidden on end card (avatar is shown big there)
   document.getElementById('hdr').style.opacity = 1 - cout;
   end.style.opacity = cout;
