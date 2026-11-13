@@ -10,37 +10,48 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const FPS = 30;
 
-// Epidemic Sound effects (licensed, not committed): see reels/sfx.json for IDs.
-// Each cue: [file, start time (s), gain (dB), optional max length (s)]
+// Epidemic Sound music + effects (licensed, not committed): see reels/sfx.json for IDs.
+// Each cue: [file, start time (s), gain (dB), options]
 const SFX = path.join(ROOT, '.work', 'sfx');
 function addSound(out, T) {
   const silent = path.join(out, 'silent.mp4'), video = path.join(out, 'video.mp4');
-  const need = ['whoosh', 'typing', 'sent', 'tap', 'success'];
-  if (!need.every(n => fs.existsSync(path.join(SFX, n + '.wav')))) {
-    console.warn('\nno sound effects in .work/sfx, video has no audio');
+  const need = ['music', 'hit', 'whoosh', 'typing_soft', 'sent', 'pop', 'wrong', 'correct', 'success'];
+  const missing = need.filter(n => !fs.existsSync(path.join(SFX, n + '.wav')));
+  if (missing.length) {
+    console.warn(`\nmissing sounds in .work/sfx (${missing.join(', ')}), video has no audio`);
     fs.renameSync(silent, video);
     return;
   }
-  const cues = [['whoosh', 0.0, 6]];
-  T.rounds.forEach(r => {
-    cues.push(['whoosh', r.start - 0.25, 6],
-      ['typing', r.typeStart, -3, r.typeEnd - r.typeStart],
-      ['sent', r.typeEnd + 0.05, 0],
-      ...r.lineTimes.map(t => ['tap', t, 6]));
+  const cues = [
+    // quiet lo-fi bed under everything, starting where the beat comes in
+    ['music', 0, -19, { from: 6.0, len: T.total, fadeIn: 0.4, fadeOut: 1.5 }],
+    ['hit', 0.0, 9],
+  ];
+  T.rounds.forEach((r, i) => {
+    cues.push(['whoosh', r.start - 0.25, i === 0 ? 4 : 6],
+      ['typing_soft', r.typeStart, 13, { len: r.typeEnd - r.typeStart, tempo: 1.3 }],
+      ['sent', r.typeEnd + 0.05, -5],
+      ...r.lineTimes.map(t => ['pop', t, 7]));
+    const last = r.lineTimes[r.lineTimes.length - 1] + 0.45;
+    if (r.tone === 'bad') cues.push(['wrong', last, 0]);
+    if (r.tone === 'good') cues.push(['correct', last, -2]);
   });
-  cues.push(
-    ['whoosh', T.endStart - 0.25, 6],
-    ['success', T.endStart + 0.1, 12]);
+  cues.push(['whoosh', T.endStart - 0.25, 6], ['success', T.endStart + 0.1, 12]);
+
   const args = ['-v', 'error', '-y', '-i', silent];
   const parts = [];
-  cues.forEach(([name, start, gain, len], i) => {
+  cues.forEach(([name, start, gain, o = {}], i) => {
     args.push('-i', path.join(SFX, name + '.wav'));
-    const trim = len ? `atrim=0:${len},afade=t=out:st=${Math.max(0, len - 0.3)}:d=0.3,` : '';
-    const ms = Math.round(start * 1000);
-    parts.push(`[${i + 1}:a]${trim}aformat=sample_rates=48000:channel_layouts=stereo,volume=${gain}dB,adelay=${ms}|${ms}[a${i}]`);
+    let f = '';
+    if (o.from) f += `atrim=start=${o.from},asetpts=PTS-STARTPTS,`;
+    if (o.tempo) f += `atempo=${o.tempo},`;
+    if (o.len) f += `atrim=0:${o.len},afade=t=out:st=${Math.max(0, o.len - (o.fadeOut || 0.3))}:d=${o.fadeOut || 0.3},`;
+    if (o.fadeIn) f += `afade=t=in:d=${o.fadeIn},`;
+    const ms = Math.max(0, Math.round(start * 1000));
+    parts.push(`[${i + 1}:a]${f}aformat=sample_rates=48000:channel_layouts=stereo,volume=${gain}dB,adelay=${ms}|${ms}[a${i}]`);
   });
   const mix = cues.map((_, i) => `[a${i}]`).join('') +
-    `amix=inputs=${cues.length}:normalize=0,alimiter=limit=0.89,apad,atrim=0:${T.total}[aout]`;
+    `amix=inputs=${cues.length}:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:${T.total}[aout]`;
   args.push('-filter_complex', parts.join(';') + ';' + mix, '-map', '0:v', '-map', '[aout]',
     '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', video);
   require('child_process').execFileSync('ffmpeg', args, { stdio: 'inherit' });

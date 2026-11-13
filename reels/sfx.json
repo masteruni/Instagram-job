@@ -1,8 +1,12 @@
 {
-  "_note": "Epidemic Sound effects used by render.js. Download each as WAV into .work/sfx/<name>.wav (not committed: licensed files).",
-  "typing":  { "id": "3a722cb7-a75f-4d43-9fc8-ec95a175757e", "title": "Computers, Keyboard & Mouse, Keyboard, Laptop, Typing, HP Stream, Fast" },
-  "whoosh":  { "id": "27384f5f-7e69-4f29-916d-b31071cf0112", "title": "Swooshes, Whoosh, Tech, Data Transition 02" },
-  "sent":    { "id": "7bb0265e-6b48-4e13-a3be-83170b4255d1", "title": "User Interface, Alert, Notification, Message, Text 02" },
-  "tap":     { "id": "45c94b43-2fb0-4970-98db-cc0fe6ea3678", "title": "User Interface, Click, UI Buttons, Glassy, Touch" },
-  "success": { "id": "aaa20ea0-8cdc-4c8f-991b-c58a94c0d130", "title": "User Interface, Misc, Completions, Melodic, Success" }
+  "_note": "Epidemic Sound audio used by render.js. Download each as WAV into .work/sfx/<name>.wav (not committed: licensed files).",
+  "music":       { "id": "a54ddcdb-faaa-4840-b9a9-cad10a69e5c4", "type": "recording", "title": "Iced Tea - Guustavv (full mix)" },
+  "hit":         { "id": "27532213-ea63-475e-b186-c674ca4c7023", "title": "Designed, Impact, Hit, Fast, Short, Scifi 02" },
+  "whoosh":      { "id": "27384f5f-7e69-4f29-916d-b31071cf0112", "title": "Swooshes, Whoosh, Tech, Data Transition 02" },
+  "typing_soft": { "id": "a00a407b-f285-4d7f-8b48-5c8197899427", "title": "Computers, Keyboard & Mouse, Keyboard, Macbook Pro, Typing, Soft, Normal Speed" },
+  "sent":        { "id": "7bb0265e-6b48-4e13-a3be-83170b4255d1", "title": "User Interface, Alert, Notification, Message, Text 02" },
+  "pop":         { "id": "ae397789-f558-4e6f-975b-d9aed7258bee", "title": "User Interface, Alert, Pops, Wobble, Bloop, Pops" },
+  "wrong":       { "id": "b0f11b27-abae-4de2-b5ac-f13b9c4f45e0", "title": "User Interface, Alert, Buzz, Funny, Wrong Answer" },
+  "correct":     { "id": "44cd2aee-c601-43ec-a3bd-75390bffad85", "title": "User Interface, Alert, Alert, Delayed, High Pitched, Correct, Positive" },
+  "success":     { "id": "aaa20ea0-8cdc-4c8f-991b-c58a94c0d130", "title": "User Interface, Misc, Completions, Melodic, Success" }
 }

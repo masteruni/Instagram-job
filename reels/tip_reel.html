@@ -138,7 +138,7 @@ window.setup = (spec, avatarUrl) => {
     const step = Math.min(1.0, (r.answerTime || 8.4) / lines.length);
     const ansEnd = ansStart + lines.length * step;
     const end = ansEnd + (r.hold != null ? r.hold : 1.8);
-    const rt = { start: s0, typeStart, typeEnd, ansStart, step, ansEnd, end,
+    const rt = { tone: r.tone || '', start: s0, typeStart, typeEnd, ansStart, step, ansEnd, end,
                  lineTimes: lines.map((_, j) => ansStart + j * step) };
     T.rounds.push(rt);
     s0 = end;
