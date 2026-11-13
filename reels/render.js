@@ -21,16 +21,16 @@ function addSound(out, T) {
     fs.renameSync(silent, video);
     return;
   }
-  const typeLen = T.typeEnd - T.typeStart;
-  const cues = [
-    ['whoosh', 0.0, 6],
-    ['whoosh', T.hookEnd - 0.25, 6],
-    ['typing', T.typeStart, -3, typeLen],
-    ['sent', T.typeEnd + 0.05, 0],
-    ...T.lineTimes.map(t => ['tap', t, 6]),
+  const cues = [['whoosh', 0.0, 6]];
+  T.rounds.forEach(r => {
+    cues.push(['whoosh', r.start - 0.25, 6],
+      ['typing', r.typeStart, -3, r.typeEnd - r.typeStart],
+      ['sent', r.typeEnd + 0.05, 0],
+      ...r.lineTimes.map(t => ['tap', t, 6]));
+  });
+  cues.push(
     ['whoosh', T.endStart - 0.25, 6],
-    ['success', T.endStart + 0.1, 12],
-  ];
+    ['success', T.endStart + 0.1, 12]);
   const args = ['-v', 'error', '-y', '-i', silent];
   const parts = [];
   cues.forEach(([name, start, gain, len], i) => {

@@ -1,0 +1,35 @@
+{
+  "hook": "Why your AI emails sound *so generic*",
+  "hookSub": "Same task. Two prompts. Watch the difference.",
+  "rounds": [
+    {
+      "tone": "bad",
+      "title": "What most people type",
+      "prompt": "Write an email asking for a raise",
+      "answer": [
+        "Dear [Manager's Name],",
+        "I hope this email finds you well. I am writing to respectfully request a review of my current compensation...",
+        "[Your Name]"
+      ],
+      "answerTime": 2.4,
+      "hold": 1.6
+    },
+    {
+      "tone": "good",
+      "title": "Type *this* instead",
+      "prompt": "I'm a project coordinator, 2 years here. I led our vendor switch that cut costs 12%. Write a short, confident email asking my manager Dana for 20 min to talk about my pay. Under 80 words.",
+      "answer": [
+        "**Subject: 20 minutes next week?**",
+        "Hi Dana,",
+        "Over the past 2 years my role has grown, including leading our vendor switch that ==cut costs by 12%.==",
+        "==I'd love 20 minutes next week to talk about my pay== and where I can grow next.",
+        "Does Tuesday or Wednesday work?",
+        "Thanks, Sam"
+      ],
+      "answerTime": 6.0,
+      "hold": 2.0
+    }
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "Why your AI emails sound so generic 🤖\n\nIt's not the AI, it's the prompt. Give it 3 things and the answer gets way more useful:\n1️⃣ Who you are\n2️⃣ The details only you know\n3️⃣ What you want (tone + length)\n\nCopy this prompt 👇\n\"I'm a [your role]. [1-2 key details]. Write a short, confident email to [person] asking for [what you want]. Under 80 words.\"\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#aitips #chatgpt #promptengineering #worksmarter #officelife"
+}

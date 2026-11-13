@@ -55,6 +55,13 @@
   .thinking { display: flex; gap: 12px; padding: 20px 0; }
   .thinking i { width: 18px; height: 18px; border-radius: 50%; background: #8e8e93; display: block; }
 
+  .tag { display: inline-block; font-size: 38px; font-weight: 800; letter-spacing: 1px; padding: 8px 22px; border-radius: 14px; margin-right: 14px; vertical-align: 6px; }
+  .tag.bad { background: #ff4d4f; color: #fff; }
+  .tag.good { background: #2fd27a; color: #03250f; }
+  .round.bad .ai .body { color: #6e6e73; }
+  .round { position: absolute; inset: 0; }
+  .ttl { position: absolute; left: 0; right: 0; top: 0; }
+
   /* end card */
   #end { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80px; }
   #end .big { font-size: 84px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
@@ -72,13 +79,7 @@
   <div id="title"></div>
   <div class="card">
     <div class="bar"><i class="dot" style="background:#ff5f57"></i><i class="dot" style="background:#febc2e"></i><i class="dot" style="background:#28c840"></i><span>AI Chat</span></div>
-    <div class="viewport"><div class="feed" id="feed">
-      <div class="user" id="user"></div>
-      <div class="ai" id="ai">
-        <div class="av"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg></div>
-        <div class="body"><div class="thinking" id="think"><i></i><i></i><i></i></div><div id="answer"></div></div>
-      </div>
-    </div></div>
+    <div class="viewport" id="vp"></div>
   </div>
 </div>
 
@@ -96,7 +97,9 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 // **bold**, ==highlight==, *accent* (yellow, in titles)
 const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/==(.+?)==/g, '<span class="hl">$1</span>').replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-let S, lines, T;
+let S, T, R;
+const AI_AV = '<div class="av"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg></div>';
+const TAGS = { bad: 'BAD PROMPT', good: 'BETTER PROMPT' };
 window.setup = (spec, avatarUrl) => {
   S = spec;
   document.getElementById('hdr').innerHTML =
@@ -104,23 +107,46 @@ window.setup = (spec, avatarUrl) => {
   document.getElementById('endAv').src = avatarUrl;
   document.getElementById('hookText').innerHTML = fmt(spec.hook);
   document.getElementById('hookSub').textContent = spec.hookSub || '';
-  document.getElementById('title').innerHTML = fmt(spec.title || spec.hook);
-  document.getElementById('answer').innerHTML = spec.answer.map(l =>
-    l === '' ? '<div class="line gap"></div>' : `<div class="line">${fmt(l)}</div>`).join('');
   document.getElementById('endBig').innerHTML = fmt(spec.endBig || 'Comment *TEAM* for 5 more prompts like this');
   // one call to action per post (Dave's plan): the pill only shows if a spec asks for it
   const pill = document.getElementById('endPill');
   pill.textContent = spec.endPill || '';
   pill.style.display = spec.endPill ? '' : 'none';
-  lines = [...document.querySelectorAll('#answer .line:not(.gap)')];
-  // timeline (seconds)
-  const n = lines.length;
-  T = { hookEnd: 2.2, typeStart: 2.6, typeEnd: 7.6, think: 8.4, ansStart: 8.6,
-        ansStep: Math.min(1.0, 8.4 / n) };
-  T.ansEnd = T.ansStart + n * T.ansStep;
-  T.endStart = Math.max(18.4, T.ansEnd + 1.8);
+
+  // a reel is one or more prompt -> answer rounds (e.g. bad prompt vs better prompt)
+  const rounds = spec.rounds || [{ title: spec.title || spec.hook, prompt: spec.prompt, answer: spec.answer }];
+  const vp = document.getElementById('vp'), title = document.getElementById('title');
+  title.innerHTML = ''; vp.innerHTML = '';
+  T = { hookEnd: 2.2, rounds: [] };
+  let s0 = T.hookEnd;
+  R = rounds.map((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'round' + (r.tone ? ' ' + r.tone : '');
+    el.innerHTML = `<div class="feed"><div class="user"></div><div class="ai">${AI_AV}<div class="body">
+      <div class="thinking"><i></i><i></i><i></i></div>
+      <div>${r.answer.map(l => l === '' ? '<div class="line gap"></div>' : `<div class="line">${fmt(l)}</div>`).join('')}</div>
+      </div></div></div>`;
+    vp.appendChild(el);
+    const tt = document.createElement('div');
+    tt.className = 'ttl';
+    tt.innerHTML = (r.tone ? `<span class="tag ${r.tone}">${TAGS[r.tone]}</span>` : '') + fmt(r.title || '');
+    title.appendChild(tt);
+    const lines = [...el.querySelectorAll('.line:not(.gap)')];
+    const typeStart = s0 + (i === 0 ? 0.4 : 0.6);
+    const typeEnd = typeStart + clamp(r.prompt.length / 40, 1.2, 5.0);
+    const ansStart = typeEnd + 1.0;
+    const step = Math.min(1.0, (r.answerTime || 8.4) / lines.length);
+    const ansEnd = ansStart + lines.length * step;
+    const end = ansEnd + (r.hold != null ? r.hold : 1.8);
+    const rt = { start: s0, typeStart, typeEnd, ansStart, step, ansEnd, end,
+                 lineTimes: lines.map((_, j) => ansStart + j * step) };
+    T.rounds.push(rt);
+    s0 = end;
+    return { el, tt, lines, r, rt, feed: el.querySelector('.feed'), user: el.querySelector('.user'),
+             ai: el.querySelector('.ai'), think: el.querySelector('.thinking') };
+  });
+  T.endStart = Math.max(18.4, s0);
   T.total = T.endStart + 3.6;
-  T.lineTimes = lines.map((_, i) => T.ansStart + i * T.ansStep);
   return T;
 };
 
@@ -132,30 +158,34 @@ window.render = t => {
   hook.style.opacity = hin * (1 - hout);
   h1.style.transform = `translateY(${(1 - hin) * 60 - hout * 80}px) scale(${0.94 + 0.06 * hin})`;
   sub.style.opacity = ease((t - 0.5) / 0.4);
-  // scene 2/3
+  // chat scenes
   const cin = ease((t - T.hookEnd) / 0.45), cout = ease((t - T.endStart) / 0.4);
   chat.style.opacity = cin * (1 - cout);
   chat.style.transform = `translateY(${(1 - cin) * 80}px)`;
-  const p = S.prompt, k = Math.floor(p.length * clamp((t - T.typeStart) / (T.typeEnd - T.typeStart)));
-  const typing = t < T.typeEnd + 0.4 && Math.floor(t * 2.2) % 2 === 0 || (t >= T.typeStart && t < T.typeEnd);
-  document.getElementById('user').innerHTML = esc(p.slice(0, k)) + (typing ? '<span class="caret"></span>' : '');
-  document.getElementById('user').style.opacity = t < T.typeStart - 0.1 ? 0 : 1;
-  const ai = document.getElementById('ai');
-  ai.style.opacity = t >= T.typeEnd + 0.3 ? 1 : 0;
-  const think = document.getElementById('think');
-  think.style.display = t < T.ansStart + 0.2 ? 'flex' : 'none';
-  [...think.children].forEach((d, i) => d.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 9 - i * 1.1)));
-  lines.forEach((l, i) => {
-    const a = ease((t - (T.ansStart + i * T.ansStep)) / 0.35);
-    l.style.opacity = a; l.style.transform = `translateY(${(1 - a) * 14}px)`;
-    l.querySelectorAll('.hl').forEach(h => h.style.backgroundSize = `${100 * ease((t - (T.ansStart + i * T.ansStep) - 0.35) / 0.5)}% 100%`);
+  R.forEach((o, i) => {
+    const rt = o.rt, next = R[i + 1];
+    const vis = (i === 0 ? 1 : ease((t - rt.start) / 0.35)) * (next ? 1 - ease((t - next.rt.start) / 0.3) : 1);
+    o.el.style.opacity = vis; o.tt.style.opacity = vis;
+    o.tt.style.transform = `translateY(${(1 - (i === 0 ? 1 : ease((t - rt.start) / 0.35))) * 20}px)`;
+    const p = o.r.prompt, k = Math.floor(p.length * clamp((t - rt.typeStart) / (rt.typeEnd - rt.typeStart)));
+    const typing = (t >= rt.typeStart && t < rt.typeEnd) || (t < rt.typeEnd + 0.4 && Math.floor(t * 2.2) % 2 === 0);
+    o.user.innerHTML = esc(p.slice(0, k)) + (typing ? '<span class="caret"></span>' : '');
+    o.user.style.opacity = t < rt.typeStart - 0.1 ? 0 : 1;
+    o.ai.style.opacity = t >= rt.typeEnd + 0.3 ? 1 : 0;
+    o.think.style.display = t < rt.ansStart + 0.2 ? 'flex' : 'none';
+    [...o.think.children].forEach((d, j) => d.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 9 - j * 1.1)));
+    o.lines.forEach((l, j) => {
+      const lt = rt.lineTimes[j], a = ease((t - lt) / 0.35);
+      l.style.opacity = a; l.style.transform = `translateY(${(1 - a) * 14}px)`;
+      l.querySelectorAll('.hl').forEach(h => h.style.backgroundSize = `${100 * ease((t - lt - 0.35) / 0.5)}% 100%`);
+    });
+    // auto-scroll so the newest line stays visible
+    const vp = o.el.parentElement;
+    const shown = o.lines.filter(l => parseFloat(l.style.opacity) > 0.01);
+    let bottom = o.user.offsetTop + o.user.offsetHeight + 40;
+    if (t >= rt.typeEnd + 0.3) bottom = Math.max(bottom, shown.length ? shown[shown.length - 1].offsetTop + shown[shown.length - 1].offsetHeight + 34 : 120);
+    o.feed.style.transform = `translateY(${-Math.max(0, bottom + 40 - vp.clientHeight)}px)`;
   });
-  // auto-scroll the chat so the newest line stays visible
-  const feed = document.getElementById('feed'), vp = feed.parentElement;
-  const visible = [...lines].filter(l => parseFloat(l.style.opacity) > 0.01);
-  let bottom = document.getElementById('user').offsetTop + document.getElementById('user').offsetHeight + 40;
-  if (t >= T.typeEnd + 0.3) bottom = Math.max(bottom, (visible.length ? visible[visible.length - 1].offsetTop + visible[visible.length - 1].offsetHeight + 34 : 120));
-  feed.style.transform = `translateY(${-Math.max(0, bottom + 40 - vp.clientHeight)}px)`;
   // header hidden on end card (avatar is shown big there)
   document.getElementById('hdr').style.opacity = 1 - cout;
   end.style.opacity = cout;

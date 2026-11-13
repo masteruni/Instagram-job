@@ -1,0 +1,13 @@
+Why your AI emails sound so generic 🤖
+
+It's not the AI, it's the prompt. Give it 3 things and the answer gets way more useful:
+1️⃣ Who you are
+2️⃣ The details only you know
+3️⃣ What you want (tone + length)
+
+Copy this prompt 👇
+"I'm a [your role]. [1-2 key details]. Write a short, confident email to [person] asking for [what you want]. Under 80 words."
+
+Comment TEAM and I'll send you 5 more prompts like this for work 📩
+-
+#aitips #chatgpt #promptengineering #worksmarter #officelife
