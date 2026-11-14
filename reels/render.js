@@ -27,6 +27,7 @@ function addSound(out, T) {
     ['music', 0, -19, { from: 6.0, len: T.total, fadeIn: 0.4, fadeOut: 1.5 }],
     ['hit', 0.0, 9],
   ];
+  if (T.cues) cues.push(...T.cues);
   T.rounds.forEach((r, i) => {
     cues.push(['whoosh', r.start - 0.25, i === 0 ? 4 : 6],
       ['typing_soft', r.typeStart, 13, { len: r.typeEnd - r.typeStart, tempo: 1.3 }],

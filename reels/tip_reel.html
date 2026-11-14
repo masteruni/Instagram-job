@@ -76,6 +76,32 @@
   .item .mini .user, .item .mini .ai .body { font-size: 46px; line-height: 1.36; }
   .item .mini .ai { margin-top: 40px; }
 
+  /* transform mode: before -> after inside an email screen */
+  #xf .xlabel { position: absolute; left: 80px; right: 80px; top: 430px; font-size: 52px; font-weight: 800; line-height: 1.15; }
+  #xf .xlabel em { font-style: normal; color: #ffd84d; }
+  #xf .xlabel > div { position: absolute; left: 0; right: 0; top: 0; }
+  .mail { position: absolute; left: 50px; right: 50px; top: 590px; height: 970px; background: #fff; border-radius: 36px;
+    overflow: hidden; color: #1d1d1f; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .mail .mbar { height: 78px; background: #ececef; display: flex; align-items: center; padding: 0 30px; gap: 12px; }
+  .mail .mbar span { margin-left: 18px; font-size: 30px; color: #6e6e73; font-weight: 600; }
+  .mail .pane { position: absolute; top: 78px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+  .mail .inner { position: absolute; left: 0; right: 0; top: 0; padding: 26px 44px 140px; }
+  .mail .field { font-size: 32px; color: #6e6e73; padding: 10px 0; border-bottom: 2px solid #ececef; }
+  .mail .field b { color: #1d1d1f; font-weight: 700; }
+  .mail .mbody { padding-top: 26px; font-size: 38px; line-height: 1.42; }
+  .mail .mbody p + p { margin-top: 22px; }
+  .mail .after .mbody { font-size: 44px; }
+  .mail .after .ln { opacity: 0; }
+  .mail .after .ln + .ln { margin-top: 14px; }
+  .mail .hl { background-image: linear-gradient(#ffe56b, #ffe56b); background-repeat: no-repeat; background-size: 0% 100%; border-radius: 6px; padding: 0 6px; margin-left: -6px; }
+  .mail .fade { position: absolute; left: 0; right: 0; bottom: 0; height: 220px; background: linear-gradient(rgba(255,255,255,0), #fff 75%); }
+  .badge { position: absolute; right: 30px; bottom: 30px; font-size: 36px; font-weight: 800; padding: 16px 28px; border-radius: 999px; color: #fff; }
+  .badge.bad { background: #ff4d4f; } .badge.good { background: #18b964; }
+  .sweep { position: absolute; left: 0; right: 0; height: 260px; background: linear-gradient(rgba(255,216,77,0), rgba(255,216,77,.55), rgba(255,255,255,0)); }
+  .chip { position: absolute; left: 90px; right: 90px; top: 900px; background: #0b1a4f; border: 3px solid #ffd84d; border-radius: 30px;
+    padding: 30px 36px; font-size: 42px; line-height: 1.35; color: #fff; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .chip .lbl { font-size: 30px; font-weight: 800; letter-spacing: 2px; color: #ffd84d; margin-bottom: 10px; }
+
   /* end card */
   #end { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80px; }
   #end .big { font-size: 84px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
@@ -98,6 +124,22 @@
 </div>
 
 <div class="scene" id="list"></div>
+
+<div class="scene" id="xf">
+  <div class="xlabel" id="xlabel"></div>
+  <div class="mail" id="mail">
+    <div class="mbar"><i class="dot" style="background:#ff5f57"></i><i class="dot" style="background:#febc2e"></i><i class="dot" style="background:#28c840"></i><span>New message</span></div>
+    <div class="pane">
+      <div class="inner before" id="mBefore"></div>
+      <div class="inner after" id="mAfter"></div>
+      <div class="fade" id="mFade"></div>
+      <div class="sweep" id="sweep"></div>
+    </div>
+    <div class="badge bad" id="bBefore"></div>
+    <div class="badge good" id="bAfter"></div>
+  </div>
+  <div class="chip" id="chip"><div class="lbl">✦ ONE PROMPT</div><div id="chipText"></div></div>
+</div>
 
 <div class="scene" id="end">
   <img id="endAv">
@@ -129,6 +171,7 @@ window.setup = (spec, avatarUrl) => {
   pill.textContent = spec.endPill || '';
   pill.style.display = spec.endPill ? '' : 'none';
   if (spec.items) return setupList(spec);
+  if (spec.transform) return setupTransform(spec);
 
   // a reel is one or more prompt -> answer rounds (e.g. bad prompt vs better prompt)
   const rounds = spec.rounds || [{ title: spec.title || spec.hook, prompt: spec.prompt, answer: spec.answer }];
@@ -227,6 +270,86 @@ function renderList(t, cout) {
   });
 }
 
+// ---- transform mode ---------------------------------------------------------
+let X;
+const words = s => s.replace(/[=*•]/g, ' ').split(/\s+/).filter(w => /[A-Za-z0-9]/.test(w)).length;
+const readTime = n => { const sec = Math.round(n / 200 * 60 / 5) * 5; return sec >= 60 ? `${Math.floor(sec / 60)} min ${sec % 60 ? (sec % 60) + ' sec ' : ''}read` : `${Math.max(5, sec)} sec read`; };
+function setupTransform(spec) {
+  const x = spec.transform;
+  const mail = (subj, body) => `<div class="field">To: <b>${esc(x.to || 'Team')}</b></div><div class="field">Subject: <b>${fmt(subj)}</b></div><div class="mbody">${body}</div>`;
+  document.getElementById('mBefore').innerHTML = mail(x.before.subject, x.before.body.map(p => `<p>${fmt(p)}</p>`).join(''));
+  document.getElementById('mAfter').innerHTML = mail(x.after.subject, x.after.lines.map(l => `<div class="ln">${fmt(l)}</div>`).join(''));
+  const wb = words(x.before.body.join(' ')), wa = words(x.after.lines.join(' '));
+  document.getElementById('bBefore').textContent = `${wb} words · ${readTime(wb)}`;
+  document.getElementById('bAfter').textContent = `${wa} words · ${readTime(wa)}`;
+  document.getElementById('xlabel').innerHTML =
+    `<div id="lb1"><span class="tag bad">BEFORE</span>${fmt(x.before.title || '')}</div>` +
+    `<div id="lb2"><span class="tag good">AFTER</span>${fmt(x.after.title || '')}</div>`;
+  const lines = [...document.querySelectorAll('#mAfter .ln')];
+  const t0 = 2.2, badge1 = 4.0, chipIn = 7.4, typeStart = chipIn + 0.5;
+  const typeEnd = typeStart + clamp(x.prompt.length / 40, 1.2, 3.0);
+  const sweep = typeEnd + 0.5, swap = sweep + 0.45, lineStart = swap + 0.5, step = 0.6;
+  const lineTimes = lines.map((_, i) => lineStart + i * step);
+  const badge2 = lineTimes[lineTimes.length - 1] + 0.7;
+  T = { hookEnd: t0, rounds: [] };
+  X = { x, lines, badge1, chipIn, typeStart, typeEnd, sweep, swap, lineTimes, badge2 };
+  T.endStart = Math.max(18.4, badge2 + 2.2);
+  T.total = T.endStart + 3.6;
+  T.cues = [
+    ['whoosh', t0 - 0.25, 4],
+    ['pop', badge1, 7], ['wrong', badge1 + 0.1, 0],
+    ['whoosh', chipIn - 0.2, 6],
+    ['typing_soft', typeStart, 13, { len: typeEnd - typeStart, tempo: 1.3 }],
+    ['sent', typeEnd + 0.05, -5],
+    ['whoosh', sweep - 0.1, 8],
+    ...lineTimes.map(t => ['pop', t, 7]),
+    ['pop', badge2, 7], ['correct', badge2 + 0.1, -2],
+  ];
+  return T;
+}
+
+function renderTransform(t, cout) {
+  const o = X, xf = document.getElementById('xf');
+  xf.style.opacity = ease((t - T.hookEnd) / 0.45) * (1 - cout);
+  xf.style.transform = `translateY(${(1 - ease((t - T.hookEnd) / 0.45)) * 80}px)`;
+  const swapA = ease((t - o.swap) / 0.35);
+  // labels
+  document.getElementById('lb1').style.opacity = 1 - swapA;
+  const lb2 = document.getElementById('lb2');
+  lb2.style.opacity = swapA; lb2.style.transform = `translateY(${(1 - swapA) * 20}px)`;
+  // before: slow scroll to show how long it is
+  const before = document.getElementById('mBefore'), pane = before.parentElement;
+  const maxScroll = Math.max(0, before.scrollHeight - pane.clientHeight + 40);
+  const sc = maxScroll * ease(clamp((t - 2.9) / 4.2)) ;
+  before.style.transform = `translateY(${-sc * (1 - ease((t - o.sweep) / 0.6))}px)`;
+  before.style.opacity = 1 - swapA;
+  document.getElementById('mFade').style.opacity = 1 - swapA;
+  const after = document.getElementById('mAfter');
+  after.style.opacity = swapA;
+  o.lines.forEach((l, i) => {
+    const a = ease((t - o.lineTimes[i]) / 0.3);
+    l.style.opacity = a; l.style.transform = `translateY(${(1 - a) * 14}px)`;
+    l.querySelectorAll('.hl').forEach(h => h.style.backgroundSize = `${100 * ease((t - o.lineTimes[i] - 0.3) / 0.45)}% 100%`);
+  });
+  // word-count badges
+  const b1 = ease((t - o.badge1) / 0.25) * (1 - ease((t - o.chipIn) / 0.3));
+  const bb = document.getElementById('bBefore');
+  bb.style.opacity = b1; bb.style.transform = `scale(${0.7 + 0.3 * ease((t - o.badge1) / 0.25)})`;
+  const ba = document.getElementById('bAfter'), b2 = ease((t - o.badge2) / 0.25);
+  ba.style.opacity = b2; ba.style.transform = `scale(${0.7 + 0.3 * b2})`;
+  // prompt chip: card dims while the prompt is typed, then the sweep rewrites the email
+  const chipA = ease((t - o.chipIn) / 0.35) * (1 - ease((t - o.sweep) / 0.35));
+  const chip = document.getElementById('chip');
+  chip.style.opacity = chipA; chip.style.transform = `translateY(${(1 - ease((t - o.chipIn) / 0.35)) * 60}px)`;
+  const p = o.x.prompt, k = Math.floor(p.length * clamp((t - o.typeStart) / (o.typeEnd - o.typeStart)));
+  const typing = (t >= o.typeStart && t < o.typeEnd) || (t < o.typeEnd + 0.4 && Math.floor(t * 2.2) % 2 === 0);
+  document.getElementById('chipText').innerHTML = esc(p.slice(0, k)) + (typing && t >= o.typeStart ? '<span class="caret"></span>' : '');
+  document.getElementById('mail').style.filter = `brightness(${1 - 0.45 * chipA})`;
+  const sw = document.getElementById('sweep'), sp = clamp((t - o.sweep) / 0.9);
+  sw.style.opacity = sp > 0 && sp < 1 ? 1 : 0;
+  sw.style.top = `${-260 + sp * (pane.clientHeight + 260)}px`;
+}
+
 window.render = t => {
   const hook = document.getElementById('hook'), chat = document.getElementById('chat'), end = document.getElementById('end');
   // scene 1
@@ -237,11 +360,17 @@ window.render = t => {
   sub.style.opacity = ease((t - 0.5) / 0.4);
   // chat scenes
   const cin = ease((t - T.hookEnd) / 0.45), cout = ease((t - T.endStart) / 0.4);
-  if (S.items) {
+  if (S.transform) {
+    chat.style.opacity = 0;
+    document.getElementById('list').style.opacity = 0;
+    renderTransform(t, cout);
+  } else if (S.items) {
+    document.getElementById('xf').style.opacity = 0;
     chat.style.opacity = 0;
     renderList(t, cout);
   } else {
   document.getElementById('list').style.opacity = 0;
+  document.getElementById('xf').style.opacity = 0;
   chat.style.opacity = cin * (1 - cout);
   chat.style.transform = `translateY(${(1 - cin) * 80}px)`;
   R.forEach((o, i) => {

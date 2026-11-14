@@ -1,0 +1,34 @@
+{
+  "hook": "Your emails are *too long*",
+  "hookSub": "Here's the 1-prompt fix.",
+  "transform": {
+    "to": "Website team",
+    "prompt": "Make this email short and clear. Bullets, with the ask first.",
+    "before": {
+      "title": "Nobody reads *all of this*",
+      "subject": "Quick update on the project (sorry, long one!)",
+      "body": [
+        "Hi team,",
+        "I just wanted to reach out and give everyone a quick update on where things are with the website project, since I know there have been a lot of questions going around and I wanted to make sure we're all on the same page before the end of the week.",
+        "So, as some of you might already know, the designer sent over the new homepage files yesterday afternoon, and I've had a chance to look through them, and overall I think they look really good, although there are a couple of small things we might want to tweak at some point.",
+        "Also, I talked to Mark about the launch date, and it sounds like we may need to push it back a little, probably to the 18th instead of the 11th, but that's not 100% confirmed yet, so please don't share it outside the team just yet.",
+        "One more thing: could everyone please send me their feedback on the homepage by Wednesday if possible? That would really help me pull everything together in time.",
+        "Thanks so much, and let me know if you have any questions at all!",
+        "Sam"
+      ]
+    },
+    "after": {
+      "title": "Same email, *80% shorter*",
+      "subject": "Website: feedback by Wed + launch update",
+      "lines": [
+        "Hi team, one ask and two updates:",
+        "==• Please send homepage feedback by Wednesday.==",
+        "• New homepage designs are in. They look good.",
+        "• Launch likely moves to **the 18th** (not confirmed yet, keep it in the team).",
+        "Thanks! Sam"
+      ]
+    }
+  },
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "Your emails are too long ✂️\n\nIf people have to scroll, they skim and miss what you need from them. Paste your email into any AI chat with this:\n\nCopy this prompt 👇\n\"Make this email short and clear. Bullets, with the ask first.\"\n\nYou still read it before sending, but now people actually see your ask.\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#aitips #email #productivity #worksmarter #officelife"
+}
