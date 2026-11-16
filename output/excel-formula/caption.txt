@@ -1,0 +1,12 @@
+Stop googling Excel formulas 📊
+
+Describe what you want in plain English and let AI write the formula (and explain it, so you actually learn it).
+
+Copy this prompt 👇
+"In Excel, column [X] has [what] and column [Y] has [what]. Give me a formula for [what you want], and explain it simply."
+
+Tip: test it on a few rows first to make sure the numbers look right.
+
+Comment TEAM and I'll send you 5 more prompts like this for work 📩
+-
+#excel #exceltips #aitips #worksmarter #officelife

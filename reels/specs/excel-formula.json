@@ -1,0 +1,18 @@
+{
+  "hook": "Stop googling *Excel formulas*",
+  "hookSub": "Just describe what you want.",
+  "title": "Plain English in, *formula* out",
+  "prompt": "In Excel, column B has sales and column C has the region. Give me a formula for total sales in the West region, and explain it simply.",
+  "answer": [
+    "Use this formula:",
+    "==**=SUMIF(C:C, \"West\", B:B)**==",
+    "",
+    "• **C:C** = where to look (Region)",
+    "• **\"West\"** = what to match",
+    "• **B:B** = what to add up (Sales)",
+    "",
+    "Paste it in any empty cell. Done."
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "Stop googling Excel formulas 📊\n\nDescribe what you want in plain English and let AI write the formula (and explain it, so you actually learn it).\n\nCopy this prompt 👇\n\"In Excel, column [X] has [what] and column [Y] has [what]. Give me a formula for [what you want], and explain it simply.\"\n\nTip: test it on a few rows first to make sure the numbers look right.\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#excel #exceltips #aitips #worksmarter #officelife"
+}
