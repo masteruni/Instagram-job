@@ -24,3 +24,9 @@ Results land in `output/<name>/`. In text, `*word*` is yellow, `**word**` is bol
 
 Music and sound effects come from Epidemic Sound (IDs in `reels/sfx.json`). Download each as WAV
 into `.work/sfx/<name>.wav`; they are licensed, so they are not committed. Without them the reel renders silent.
+
+## Carousel (swipe) posts
+
+```bash
+node reels/carousel.js reels/specs/<name>.json   # 1080x1350 slides + caption.txt in output/<name>/
+```

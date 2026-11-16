@@ -1,0 +1,36 @@
+{
+  "kicker": "FOR MANAGERS",
+  "title": "5 AI prompts every *manager* should save",
+  "subtitle": "Copy, paste, fill in the [brackets]. Works in any AI chat.",
+  "slides": [
+    {
+      "title": "Give feedback that *lands*",
+      "when": "When you need to say something hard, kindly.",
+      "prompt": "Help me give feedback to a team member about [the issue]. Be kind but clear. Use 3 parts: what I saw, why it matters, what I need next."
+    },
+    {
+      "title": "Weekly update for *your boss*",
+      "when": "When your notes are a mess on Friday afternoon.",
+      "prompt": "Turn these notes into a 5-bullet weekly update for my manager: [paste notes]. Group them into wins, risks and next steps."
+    },
+    {
+      "title": "Share *tough news* with your team",
+      "when": "Before a change, delay or reorg announcement.",
+      "prompt": "I need to tell my team [the news]. Write 3 short talking points, then list the 3 questions they'll most likely ask, with honest answers."
+    },
+    {
+      "title": "A meeting agenda in *seconds*",
+      "when": "So the meeting ends with decisions, not more meetings.",
+      "prompt": "Create a 30-minute agenda for a meeting about [topic]. Include the goal, time for each item, and the decisions we need to make."
+    },
+    {
+      "title": "Draft a *performance review*",
+      "when": "When you're staring at a blank review form.",
+      "prompt": "Help me write a balanced performance review for someone who is strong at [strengths] but needs to improve [area]. Be specific. Under 150 words.",
+      "tip": "**Tip:** leave out names and private details. Always edit the draft so it's in your own words."
+    }
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like these",
+  "endSmall": "One AI tip for work, every day.",
+  "caption": "5 AI prompts every manager should save 📌\n\nSwipe through, copy the one you need, and fill in the [brackets]. They work in any AI chat.\n\n1️⃣ Give feedback that lands\n2️⃣ Weekly update for your boss\n3️⃣ Share tough news with your team\n4️⃣ A meeting agenda in seconds\n5️⃣ Draft a performance review\n\nQuick tip: never paste names or private employee details. AI writes the first draft, you make it yours.\n\nComment TEAM and I'll send you 5 more prompts like these 📩\n-\n#managers #leadership #aitips #worksmarter #productivity"
+}
