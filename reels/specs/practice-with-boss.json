@@ -1,0 +1,16 @@
+{
+  "hook": "Practice the *hard conversation* first",
+  "hookSub": "Before you ask your boss for anything.",
+  "title": "Let AI play *your boss*",
+  "prompt": "Pretend you're my manager. I'm about to ask to work from home on Fridays. Push back like a real manager would, then give me feedback on my answers.",
+  "answer": [
+    "Sure. I'll play your manager. Let's start:",
+    "",
+    "**\"Fridays are busy for the team. How would we reach you if something urgent comes up?\"**",
+    "",
+    "Your turn. Answer like you would in the room.",
+    "==After a few rounds, I'll tell you what worked and what to change.=="
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "Practice the hard conversation first 🎯\n\nAsking for a raise, a schedule change or more help? Let AI play your manager so you can practise your answers before the real talk.\n\nCopy this prompt 👇\n\"Pretend you're my manager. I'm about to ask for [what you want]. Push back like a real manager would, then give me feedback on my answers.\"\n\nAfter a few rounds you'll walk in calmer and with better answers.\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#aitips #careertips #worksmarter #officelife #communication"
+}
