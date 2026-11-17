@@ -1,0 +1,17 @@
+{
+  "hook": "Add this *one line* to your prompts",
+  "hookSub": "Your AI answers will finally sound like you.",
+  "title": "Make AI *interview you* first",
+  "prompt": "Write a short LinkedIn post about my team finishing a big project. Before you write it, ask me 3 questions.",
+  "answer": [
+    "Great, a few quick questions first:",
+    "",
+    "1. What was the project, in one line?",
+    "2. What result are you proudest of? (A number helps.)",
+    "3. Who do you want to thank by name?",
+    "",
+    "==Answer these and I'll write a post that sounds like you.=="
+  ],
+  "endBig": "Comment *TEAM* for 5 more prompts like this",
+  "caption": "Add this one line to your prompts ✍️\n\n\"Before you write it, ask me 3 questions.\"\n\nInstead of guessing, the AI asks for the details only you know. Then the post, email or update sounds like you, not like a robot.\n\nCopy this prompt 👇\n\"Write [what you need]. Before you write it, ask me 3 questions.\"\n\nComment TEAM and I'll send you 5 more prompts like this for work 📩\n-\n#aitips #chatgpt #promptengineering #worksmarter #officelife"
+}

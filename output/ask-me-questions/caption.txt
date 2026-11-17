@@ -1,0 +1,12 @@
+Add this one line to your prompts ✍️
+
+"Before you write it, ask me 3 questions."
+
+Instead of guessing, the AI asks for the details only you know. Then the post, email or update sounds like you, not like a robot.
+
+Copy this prompt 👇
+"Write [what you need]. Before you write it, ask me 3 questions."
+
+Comment TEAM and I'll send you 5 more prompts like this for work 📩
+-
+#aitips #chatgpt #promptengineering #worksmarter #officelife
